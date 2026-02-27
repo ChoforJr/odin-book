@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { ItemContext } from "../ItemContext";
 import { useContext } from "react";
 import { UserMinus, Pencil, Download } from "lucide-react";
-const apiUrl = import.meta.env.VITE_MESSAGING_APP_API_URL;
+const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
 export const PeopleChats = () => {
   const {

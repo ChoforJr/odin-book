@@ -2,7 +2,7 @@ import styles from "./homePage.module.css";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { ItemContext } from "../ItemContext";
-const apiUrl = import.meta.env.VITE_MESSAGING_APP_API_URL;
+const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
 const HomePage = () => {
   const [login, setLogin] = useState({

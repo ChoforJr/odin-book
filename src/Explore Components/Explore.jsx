@@ -2,7 +2,7 @@ import styles from "./explore.module.css";
 import { ItemContext } from "../ItemContext";
 import { useContext } from "react";
 
-const apiUrl = import.meta.env.VITE_MESSAGING_APP_API_URL;
+const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("en-US", {
