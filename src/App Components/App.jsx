@@ -8,83 +8,59 @@ import { useAppLogic } from "./UseAppLogic";
 const App = () => {
   const {
     auth,
+    tab,
+    logout,
     setAuth,
     account,
     refreshAccount,
-    contacts,
-    refreshContacts,
-    explorePeople,
-    refreshExplorePeople,
-    memberGroups,
-    refreshMemberGroups,
-    exploreGroups,
-    refreshExploreGroups,
-    allProfiles,
-    refreshAllProfiles,
-    contactMessages,
-    groupMessages,
-    logout,
-    refreshRecentContactMessages,
-    refreshRecentGroupMessages,
+    followings,
+    refreshFollowings,
+    followers,
+    refreshFollowers,
+    exploreProfiles,
+    refreshExploreProfiles,
+    homePosts,
+    trendingPosts,
   } = useAppLogic();
 
   const value = {
     auth,
+    logout,
     setAuth,
     account,
     refreshAccount,
-    contacts,
-    refreshContacts,
-    explorePeople,
-    refreshExplorePeople,
-    memberGroups,
-    refreshMemberGroups,
-    exploreGroups,
-    refreshExploreGroups,
-    allProfiles,
-    refreshAllProfiles,
-    contactMessages,
-    groupMessages,
-    logout,
-    refreshRecentContactMessages,
-    refreshRecentGroupMessages,
+    followings,
+    refreshFollowings,
+    followers,
+    refreshFollowers,
+    exploreProfiles,
+    refreshExploreProfiles,
+    homePosts,
+    trendingPosts,
   };
   return (
     <div className="container">
       <nav>
-        <h1>
+        <h1 className="navBarHeader">
           <Link to="/">
             <img src="/logo.svg" alt="logo" width={40} />
-            Messaging <span style={{ color: "#EE204D" }}>App</span>{" "}
+            Odin-Book
           </Link>
         </h1>
         <section>
-          <div className="dropdown">
-            <button className="dropbtn">Chats</button>
-            <div className="dropdown-content">
-              <Link to="/chats/people">People</Link>
-              <Link to="/chats/groups">Groups</Link>
+          {tab.map((item) => (
+            <div className="tab" key={item.link}>
+              <img src={item.logo} alt={item.label} width={30} />
+              <Link to={`/${item.link}`}>{item.label}</Link>
             </div>
-          </div>
-          <div className="dropdown">
-            <button className="dropbtn">Explore</button>
-            <div className="dropdown-content">
-              <Link to="/explore/people">People</Link>
-              <Link to="/explore/groups">Groups</Link>
-            </div>
-          </div>
-          <button className="dropbtn">
-            <Link to="/account">Account</Link>
-          </button>
+          ))}
         </section>
       </nav>
-      <>
-        <main>
-          <ItemContext.Provider value={value}>
-            <Outlet />
-          </ItemContext.Provider>
-        </main>
-      </>
+      <main>
+        <ItemContext.Provider value={value}>
+          <Outlet />
+        </ItemContext.Provider>
+      </main>
       <footer>
         Made by{" "}
         <a href="https://github.com/ChoforJr/messaging-app" target="_blank">

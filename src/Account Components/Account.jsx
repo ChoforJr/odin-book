@@ -50,31 +50,6 @@ const Account = () => {
     return false;
   };
 
-  async function deletePhoto() {
-    if (isGuest) return;
-    try {
-      const response = await fetch(
-        `${apiUrl}/user/file/profile/photo/${account.photoId}`,
-        {
-          method: "DELETE",
-          headers: { authorization: authToken },
-        },
-      );
-
-      if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const err = await response.json();
-          alert(err.error || "Delete failed");
-        } else {
-          alert("Delete failed: Server error");
-        }
-      }
-    } catch (err) {
-      console.error("Delete Error:", err);
-    }
-  }
-
   const handlePhotoUpload = async (e) => {
     if (isGuest) return alert("Guest accounts cannot change photos.");
     const file = e.target.files[0];
@@ -83,13 +58,9 @@ const Account = () => {
     const formData = new FormData();
     formData.append("uploads", file);
 
-    if (account.photoId) {
-      await deletePhoto();
-    }
-
     try {
-      const response = await fetch(`${apiUrl}/user/file/profile/photo`, {
-        method: "POST",
+      const response = await fetch(`${apiUrl}/user/change/profile/photo`, {
+        method: "PATCH",
         headers: { authorization: authToken },
         body: formData,
       });
@@ -172,7 +143,7 @@ const Account = () => {
           <h2>{account.displayName}</h2>
           <p>{account.username}</p>
           <p>Joined: {new Date(account.createdAt).toLocaleDateString()}</p>
-          <p>Bio: {account.bio || "No bio yet"}</p>
+          <p>Bio: {account.bio}</p>
         </div>
       </section>
 

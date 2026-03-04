@@ -1,18 +1,20 @@
 .accountContainer {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  color: #e6e6fa;
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+  color: #f8fafc;
 }
 
 .profileHeader {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 2rem;
-  border-radius: 15px;
+  gap: 2.5rem;
+  background: #1e293b;
+  padding: 2.5rem;
+  border-radius: 16px;
   margin-bottom: 2rem;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .profileImg {
@@ -20,23 +22,39 @@
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #ee204d;
+  border: 4px solid #334155;
 }
 
 .photoSection {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+}
+
+.basicInfo h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.basicInfo p {
+  margin: 0.25rem 0;
+  color: #94a3b8;
 }
 
 .uploadBtn {
-  font-size: 0.8rem;
-  background: #ee204d;
-  padding: 5px 10px;
-  border-radius: 5px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: #334155;
+  color: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.2s ease;
+}
+
+.uploadBtn:hover {
+  background: #475569;
 }
 
 .settingsGrid {
@@ -46,10 +64,16 @@
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.05);
+  background: #1e293b;
   padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  border: 1px solid #334155;
+}
+
+.card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #e2e8f0;
 }
 
 .fullWidth {
@@ -58,46 +82,51 @@
 
 .inputGroup {
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .inputGroup input,
-.inputGroup textarea {
-  flex: 1;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #444;
-  background: #1a1a1a;
-  color: white;
+.inputGroup textarea,
+.passwordFields input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus,
+.passwordFields input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .passwordFields {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.passwordFields input {
-  padding: 10px;
-  background: #1a1a1a;
-  border: 1px solid #444;
-  border-radius: 5px;
-  color: white;
+  gap: 12px;
 }
 
 button {
-  background: #ee204d;
+  background: #6366f1;
   color: white;
   border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 button:hover {
-  background: #ff4d6d;
+  background: #4f46e5;
 }
 
 .loginMsg {
@@ -106,73 +135,66 @@ button:hover {
 }
 
 .actionButtons {
-  margin-top: 2rem;
+  margin-top: 3rem;
   display: flex;
   justify-content: center;
 }
 
 .logoutBtn {
   background: transparent;
-  border: 2px solid #e6e6fa;
-  color: #e6e6fa;
+  border: 1px solid #64748b;
+  color: #cbd5e1;
   padding: 10px 40px;
   font-size: 1rem;
 }
 
 .logoutBtn:hover {
-  background: #e6e6fa;
-  color: #1a1a1a;
+  background: #334155;
+  border-color: #94a3b8;
 }
 
 .dangerZone {
   margin-top: 4rem;
   padding: 2rem;
-  border: 1px dashed #ff4d4d;
-  border-radius: 12px;
-  background: rgba(255, 77, 77, 0.05);
+  border: 1px solid #7f1d1d;
+  border-radius: 16px;
+  background: rgba(127, 29, 29, 0.1);
   text-align: center;
 }
 
 .dangerZone h3 {
-  color: #ff4d4d;
+  color: #f87171;
   margin-bottom: 0.5rem;
 }
 
 .dangerZone p {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   margin-bottom: 1.5rem;
-  opacity: 0.8;
+  color: #fca5a5;
 }
 
 .deleteBtn {
-  background: #ff4d4d;
-  padding: 10px 25px;
+  background: #ef4444;
 }
 
 .deleteBtn:hover {
-  background: #b30000;
+  background: #dc2626;
 }
 
 .guestNotice {
-  background: rgba(238, 32, 77, 0.15);
-  color: #130508;
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
   padding: 1rem;
   border-radius: 8px;
-  border: 1px solid #ee204d;
-  margin-bottom: 1.5rem;
+  border: 1px solid #4f46e5;
+  margin-bottom: 2rem;
   text-align: center;
   font-weight: 500;
 }
 
-/* Gray out inputs and buttons when disabled */
 input:disabled,
 textarea:disabled,
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  filter: grayscale(1);
-}
-
-.disabledArea {
-  position: relative;
 }

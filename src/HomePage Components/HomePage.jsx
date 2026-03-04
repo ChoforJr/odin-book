@@ -20,11 +20,9 @@ const HomePage = () => {
   const {
     setAuth,
     refreshAccount,
-    refreshContacts,
-    refreshExplorePeople,
-    refreshMemberGroups,
-    refreshExploreGroups,
-    refreshAllProfiles,
+    refreshFollowings,
+    refreshExploreProfiles,
+    refreshFollowers,
   } = useContext(ItemContext);
 
   function onChangeHandlerLogin(event) {
@@ -71,12 +69,10 @@ const HomePage = () => {
         localStorage.setItem("authorization", `Bearer ${data.token}`);
         setAuth(true);
         refreshAccount();
-        refreshContacts();
-        refreshExplorePeople();
-        refreshMemberGroups();
-        refreshExploreGroups();
-        refreshAllProfiles();
-        navigate("/account", { replace: false });
+        refreshFollowings();
+        refreshExploreProfiles();
+        refreshFollowers();
+        navigate("/setting", { replace: false });
       } else if (response.status === 400) {
         const errorMessages = data.errors.map((err) => err.msg).join("\n");
         alert(`Format Error:\n${errorMessages}`);
