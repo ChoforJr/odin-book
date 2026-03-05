@@ -499,6 +499,99 @@ export function useAppLogic() {
   const refreshCommentedPosts = () =>
     getCommentedPosts(localStorage.getItem("authorization"));
 
+  const createPost = async (content) => {
+    let authToken = localStorage.getItem("authorization");
+    try {
+      const response = await fetch(`${apiUrl}/post/textOnly`, {
+        method: "POST",
+        headers: {
+          authorization: `${authToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (response.ok) {
+        refreshMyPosts();
+        refreshHomePosts();
+      } else {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const err = await response.json();
+          alert(err.error || "Upload failed");
+        } else {
+          alert("Upload failed: Server error");
+        }
+      }
+    } catch (err) {
+      console.error("Upload Error:", err);
+    }
+  };
+
+  const likePost = async (e, postID) => {
+    e.stopPropagation();
+    let authToken = localStorage.getItem("authorization");
+    try {
+      const response = await fetch(`${apiUrl}/post/like`, {
+        method: "PATCH",
+        headers: {
+          authorization: `${authToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ postID }),
+      });
+
+      if (response.ok) {
+        refreshLikedPosts();
+        refreshCommentedPosts();
+        refreshMyPosts();
+        refreshTrendingPosts();
+        refreshHomePosts();
+      } else {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const err = await response.json();
+          alert(err.error || "Upload failed");
+        } else {
+          alert("Upload failed: Server error");
+        }
+      }
+    } catch (err) {
+      console.error("Upload Error:", err);
+    }
+  };
+
+  const deletePost = async (e, postID) => {
+    e.stopPropagation();
+    let authToken = localStorage.getItem("authorization");
+    try {
+      const response = await fetch(`${apiUrl}/post/${postID}`, {
+        method: "DELETE",
+        headers: {
+          authorization: `${authToken}`,
+        },
+      });
+
+      if (response.ok) {
+        refreshLikedPosts();
+        refreshCommentedPosts();
+        refreshMyPosts();
+        refreshTrendingPosts();
+        refreshHomePosts();
+      } else {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const err = await response.json();
+          alert(err.error || "Upload failed");
+        } else {
+          alert("Upload failed: Server error");
+        }
+      }
+    } catch (err) {
+      console.error("Upload Error:", err);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("authorization");
     setAuth(false);
@@ -528,14 +621,12 @@ export function useAppLogic() {
     refreshExploreProfiles,
     changeFollowingStatus,
     homePosts,
-    refreshHomePosts,
     trendingPosts,
-    refreshTrendingPosts,
     myPosts,
-    refreshMyPosts,
     likedPosts,
-    refreshLikedPosts,
     commentedPosts,
-    refreshCommentedPosts,
+    createPost,
+    likePost,
+    deletePost,
   };
 }

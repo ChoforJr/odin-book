@@ -1,9 +1,10 @@
 import "./App.css";
-
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { ItemContext } from "../ItemContext";
 import { useAppLogic } from "./UseAppLogic";
+import { Plus } from "lucide-react";
 
 const App = () => {
   const {
@@ -21,16 +22,17 @@ const App = () => {
     refreshExploreProfiles,
     changeFollowingStatus,
     homePosts,
-    refreshHomePosts,
     trendingPosts,
-    refreshTrendingPosts,
     myPosts,
-    refreshMyPosts,
     likedPosts,
-    refreshLikedPosts,
     commentedPosts,
-    refreshCommentedPosts,
+    createPost,
+    likePost,
+    deletePost,
   } = useAppLogic();
+
+  const [postContent, setPostContent] = useState("");
+  const postContentRef = useRef("");
 
   const value = {
     auth,
@@ -46,15 +48,12 @@ const App = () => {
     refreshExploreProfiles,
     changeFollowingStatus,
     homePosts,
-    refreshHomePosts,
     trendingPosts,
-    refreshTrendingPosts,
     myPosts,
-    refreshMyPosts,
     likedPosts,
-    refreshLikedPosts,
     commentedPosts,
-    refreshCommentedPosts,
+    likePost,
+    deletePost,
   };
   return (
     <div className="container">
@@ -72,6 +71,12 @@ const App = () => {
               <Link to={`/${item.link}`}>{item.label}</Link>
             </div>
           ))}
+          <div
+            className="tab addPost"
+            onClick={() => postContentRef.current.showModal()}
+          >
+            <Plus size={25} /> Add Post
+          </div>
         </section>
       </nav>
       <main>
@@ -85,6 +90,32 @@ const App = () => {
           Chofor Forsakang
         </a>
       </footer>
+      <dialog ref={postContentRef}>
+        <h1>Create a Post</h1>
+        <textarea
+          name="content"
+          id="content"
+          placeholder="Something on my mind!!!"
+          minLength={4}
+          maxLength={800}
+          value={postContent}
+          onChange={(e) => setPostContent(e.target.value)}
+        ></textarea>
+        <button
+          onClick={() => (
+            createPost(postContent),
+            postContentRef.current.close(),
+            setPostContent("")
+          )}
+        >
+          Post
+        </button>
+        <button
+          onClick={() => (postContentRef.current.close(), setPostContent(""))}
+        >
+          Cancel
+        </button>
+      </dialog>
     </div>
   );
 };

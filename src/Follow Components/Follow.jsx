@@ -1,7 +1,7 @@
 import styles from "./follow.module.css";
 import { ItemContext } from "../ItemContext";
 import { useContext } from "react";
-import { ProfileCard } from "../profile component/ProfileCard";
+import { ProfileCard } from "../ProfileCard component/ProfileCard";
 
 export const Follow = () => {
   const { exploreProfiles } = useContext(ItemContext);

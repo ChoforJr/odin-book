@@ -1,8 +1,8 @@
 import styles from "./myProfile.module.css";
 import { ItemContext } from "../ItemContext";
 import { useContext, useState } from "react";
-import { ProfileCard } from "../profile component/ProfileCard";
-import { PostCard } from "../Post component/PostCard";
+import { ProfileCard } from "../ProfileCard component/ProfileCard";
+import { PostCard } from "../PostCard component/PostCard";
 
 export const MyProfile = () => {
   const {

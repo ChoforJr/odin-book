@@ -1,7 +1,7 @@
 import styles from "./trendingPosts.module.css";
 import { ItemContext } from "../ItemContext";
 import { useContext } from "react";
-import { PostCard } from "../Post component/PostCard";
+import { PostCard } from "../PostCard component/PostCard";
 
 export const TrendingPosts = () => {
   const { trendingPosts } = useContext(ItemContext);

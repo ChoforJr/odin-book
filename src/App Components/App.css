@@ -93,6 +93,16 @@ nav section {
 .tab:hover a {
   color: #6366f1; /* Indigo 500 */
 }
+.addPost {
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid #334155;
+  color: #068314;
+}
+.addPost:hover {
+  background-color: #068314;
+  color: #f8fafc;
+}
 
 main {
   grid-area: main;
