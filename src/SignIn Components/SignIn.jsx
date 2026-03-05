@@ -1,10 +1,10 @@
-import styles from "./homePage.module.css";
+import styles from "./signIn.module.css";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { ItemContext } from "../ItemContext";
 const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
-const HomePage = () => {
+const SignIn = () => {
   const [login, setLogin] = useState({
     username: "",
     password: "",
@@ -160,6 +160,8 @@ const HomePage = () => {
                 id="username"
                 value={login.username}
                 onChange={onChangeHandlerLogin}
+                min={8}
+                max={64}
               />
             </label>
             <label htmlFor="password">
@@ -170,6 +172,8 @@ const HomePage = () => {
                 id="password"
                 value={login.password}
                 onChange={onChangeHandlerLogin}
+                min={4}
+                max={64}
               />
             </label>
             <button
@@ -196,6 +200,8 @@ const HomePage = () => {
                 id="username"
                 value={signUp.username}
                 onChange={onChangeHandlerSignup}
+                min={8}
+                max={64}
               />
             </label>
             <label htmlFor="displayName">
@@ -206,6 +212,8 @@ const HomePage = () => {
                 id="displayName"
                 value={signUp.displayName}
                 onChange={onChangeHandlerSignup}
+                min={4}
+                max={64}
               />
             </label>
             <label htmlFor="password">
@@ -216,6 +224,8 @@ const HomePage = () => {
                 id="password"
                 value={signUp.password}
                 onChange={onChangeHandlerSignup}
+                min={4}
+                max={64}
               />
             </label>
             <label htmlFor="confirmPassword">
@@ -226,6 +236,8 @@ const HomePage = () => {
                 id="confirmPassword"
                 value={signUp.confirmPassword}
                 onChange={onChangeHandlerSignup}
+                min={4}
+                max={64}
               />
             </label>
             <button
@@ -258,4 +270,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default SignIn;

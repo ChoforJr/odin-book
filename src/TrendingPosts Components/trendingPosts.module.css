@@ -1,0 +1,10 @@
+.trendingPosts {
+  color: #e6e6fa;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+}

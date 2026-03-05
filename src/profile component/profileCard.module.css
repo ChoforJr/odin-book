@@ -1,0 +1,53 @@
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  background: #1e293b;
+  padding: 2.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.profileImg {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #334155;
+}
+
+.photoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.basicInfo h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.basicInfo p {
+  margin: 0.25rem 0;
+  color: #94a3b8;
+}
+
+.followingBadge,
+.notFollowingBadge {
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: #334155;
+  color: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.followingBadge:hover,
+.notFollowingBadge:hover {
+  background: #475569;
+}

@@ -1,8 +1,10 @@
 import App from "./App Components/App";
-import HomePage from "./HomePage Components/HomePage";
-import { PeopleChats, GroupChats } from "./Chats Components/Chats";
-import { ExplorePeople, ExploreGroups } from "./Explore Components/Explore";
+import SignIn from "./SignIn Components/SignIn";
+import { HomePosts } from "./HomePosts Components/HomePosts";
 import Account from "./Account Components/Account";
+import { MyProfile } from "./MyProfile Components/MyProfile";
+import { TrendingPosts } from "./TrendingPosts Components/TrendingPosts";
+import { Follow } from "./Follow Components/Follow";
 import ErrorPage from "./ErrorPage";
 
 const routes = [
@@ -14,12 +16,12 @@ const routes = [
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: <SignIn />,
       },
-      { path: "home", element: <PeopleChats /> },
-      { path: "trending", element: <GroupChats /> },
-      { path: "follow", element: <ExplorePeople /> },
-      { path: "myProfile", element: <ExploreGroups /> },
+      { path: "home", element: <HomePosts /> },
+      { path: "trending", element: <TrendingPosts /> },
+      { path: "follow", element: <Follow /> },
+      { path: "myProfile", element: <MyProfile /> },
       { path: "setting", element: <Account /> },
     ],
   },

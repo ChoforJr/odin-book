@@ -19,8 +19,17 @@ const App = () => {
     refreshFollowers,
     exploreProfiles,
     refreshExploreProfiles,
+    changeFollowingStatus,
     homePosts,
+    refreshHomePosts,
     trendingPosts,
+    refreshTrendingPosts,
+    myPosts,
+    refreshMyPosts,
+    likedPosts,
+    refreshLikedPosts,
+    commentedPosts,
+    refreshCommentedPosts,
   } = useAppLogic();
 
   const value = {
@@ -35,8 +44,17 @@ const App = () => {
     refreshFollowers,
     exploreProfiles,
     refreshExploreProfiles,
+    changeFollowingStatus,
     homePosts,
+    refreshHomePosts,
     trendingPosts,
+    refreshTrendingPosts,
+    myPosts,
+    refreshMyPosts,
+    likedPosts,
+    refreshLikedPosts,
+    commentedPosts,
+    refreshCommentedPosts,
   };
   return (
     <div className="container">

@@ -11,6 +11,26 @@ export function useAppLogic() {
   const [followers, setFollowers] = useState(null);
   const [trendingPosts, setTrendingPosts] = useState(null);
   const [exploreProfiles, setExploreProfiles] = useState(null);
+  const [myPosts, setMyPosts] = useState(null);
+  const [likedPosts, setLikedPosts] = useState(null);
+  const [commentedPosts, setCommentedPosts] = useState(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const authToken = localStorage.getItem("authorization");
+    if (authToken) {
+      getAccountInfo(authToken);
+      getFollowings(authToken);
+      getFollowers(authToken);
+      getExploreProfiles(authToken);
+      getMyPosts(authToken);
+      getHomePosts(authToken);
+      getTrendingPosts(authToken);
+      getLikedPosts(authToken);
+      getCommentedPosts(authToken);
+    }
+  }, []);
 
   const tab = [
     { link: "", label: "Sign-In", logo: "/login.svg" },
@@ -61,11 +81,16 @@ export function useAppLogic() {
       } else if (response.status === 401) {
         setAuth(false);
         localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
       }
     } catch (error) {
       console.error("Network error:", error);
     }
   };
+  const refreshAccount = () =>
+    getAccountInfo(localStorage.getItem("authorization"));
 
   const getFollowings = async (authToken) => {
     try {
@@ -100,11 +125,16 @@ export function useAppLogic() {
       } else if (response.status === 401) {
         setAuth(false);
         localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
       }
     } catch (error) {
       console.error("Network error:", error);
     }
   };
+  const refreshFollowings = () =>
+    getFollowings(localStorage.getItem("authorization"));
 
   const getFollowers = async (authToken) => {
     try {
@@ -139,11 +169,16 @@ export function useAppLogic() {
       } else if (response.status === 401) {
         setAuth(false);
         localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
       }
     } catch (error) {
       console.error("Network error:", error);
     }
   };
+  const refreshFollowers = () =>
+    getFollowers(localStorage.getItem("authorization"));
 
   const getExploreProfiles = async (authToken) => {
     try {
@@ -178,36 +213,303 @@ export function useAppLogic() {
       } else if (response.status === 401) {
         setAuth(false);
         localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
       }
     } catch (error) {
       console.error("Network error:", error);
     }
   };
+  const refreshExploreProfiles = () =>
+    getExploreProfiles(localStorage.getItem("authorization"));
 
-  // function addContactMessages(newMessages) {
-  //   setContactMessages((prevMessages) => {
-  //     return [...prevMessages, newMessages];
-  //   });
-  // }
-  const navigate = useNavigate();
-  useEffect(() => {
-    const authToken = localStorage.getItem("authorization");
-    if (authToken) {
-      getAccountInfo(authToken);
-      getFollowings(authToken);
-      getExploreProfiles(authToken);
+  const changeFollowingStatus = async (contactId) => {
+    let authToken = localStorage.getItem("authorization");
+    try {
+      const response = await fetch(`${apiUrl}/user/profile/change/following`, {
+        method: "PATCH",
+        headers: {
+          authorization: `${authToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ contactId }),
+      });
+
+      if (response.ok) {
+        refreshAccount();
+        refreshFollowings();
+        refreshExploreProfiles();
+      } else {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const err = await response.json();
+          alert(err.error || "Upload failed");
+        } else {
+          alert("Upload failed: Server error");
+        }
+      }
+    } catch (err) {
+      console.error("Upload Error:", err);
     }
-  }, []);
+  };
+
+  const getHomePosts = async (authToken) => {
+    try {
+      const response = await fetch(`${apiUrl}/post/index`, {
+        method: "GET",
+        headers: {
+          authorization: `${authToken}`,
+        },
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const posts = result.map((item) => {
+          let profilePhoto = item.profilePhoto || "/default avatar.png";
+          if (item.type === "guest" && item.profileDisplayName === "Goku") {
+            profilePhoto = "/goku.jpeg";
+          } else if (
+            item.type === "guest" &&
+            item.profileDisplayName === "Vegeta"
+          ) {
+            profilePhoto = "/vegeta.jpg";
+          }
+          return {
+            id: item.id,
+            content: item.content,
+            keyID: crypto.randomUUID(),
+            createdAt: item.createdAt,
+            profileId: item.profileId,
+            likeCount: item.likeCount,
+            commentCount: item.commentCount,
+            profileDisplayName: item.profileDisplayName,
+            profileType: item.profileType,
+            profilePhoto: profilePhoto,
+          };
+        });
+        setHomePosts(posts);
+        setAuth(true);
+      } else if (response.status === 401) {
+        setAuth(false);
+        localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+  const refreshHomePosts = () =>
+    getHomePosts(localStorage.getItem("authorization"));
+
+  const getTrendingPosts = async (authToken) => {
+    try {
+      const response = await fetch(`${apiUrl}/post/trending`, {
+        method: "GET",
+        headers: {
+          authorization: `${authToken}`,
+        },
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const posts = result.map((item) => {
+          let profilePhoto = item.profilePhoto || "/default avatar.png";
+          if (item.type === "guest" && item.profileDisplayName === "Goku") {
+            profilePhoto = "/goku.jpeg";
+          } else if (
+            item.type === "guest" &&
+            item.profileDisplayName === "Vegeta"
+          ) {
+            profilePhoto = "/vegeta.jpg";
+          }
+          return {
+            id: item.id,
+            content: item.content,
+            keyID: crypto.randomUUID(),
+            createdAt: item.createdAt,
+            profileId: item.profileId,
+            likeCount: item.likeCount,
+            commentCount: item.commentCount,
+            profileDisplayName: item.profileDisplayName,
+            profileType: item.profileType,
+            profilePhoto: profilePhoto,
+          };
+        });
+        setTrendingPosts(posts);
+        setAuth(true);
+      } else if (response.status === 401) {
+        setAuth(false);
+        localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+  const refreshTrendingPosts = () =>
+    getTrendingPosts(localStorage.getItem("authorization"));
+
+  const getMyPosts = async (authToken) => {
+    try {
+      const response = await fetch(`${apiUrl}/post/mine`, {
+        method: "GET",
+        headers: {
+          authorization: `${authToken}`,
+        },
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const posts = result.map((item) => {
+          let profilePhoto = item.profilePhoto || "/default avatar.png";
+          if (item.type === "guest" && item.profileDisplayName === "Goku") {
+            profilePhoto = "/goku.jpeg";
+          } else if (
+            item.type === "guest" &&
+            item.profileDisplayName === "Vegeta"
+          ) {
+            profilePhoto = "/vegeta.jpg";
+          }
+          return {
+            id: item.id,
+            content: item.content,
+            keyID: crypto.randomUUID(),
+            createdAt: item.createdAt,
+            profileId: item.profileId,
+            likeCount: item.likeCount,
+            commentCount: item.commentCount,
+            profileDisplayName: item.profileDisplayName,
+            profileType: item.profileType,
+            profilePhoto: profilePhoto,
+          };
+        });
+        setMyPosts(posts);
+        setAuth(true);
+      } else if (response.status === 401) {
+        setAuth(false);
+        localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+  const refreshMyPosts = () =>
+    getMyPosts(localStorage.getItem("authorization"));
+
+  const getLikedPosts = async (authToken) => {
+    try {
+      const response = await fetch(`${apiUrl}/post/liked`, {
+        method: "GET",
+        headers: {
+          authorization: `${authToken}`,
+        },
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const posts = result.map((item) => {
+          let profilePhoto = item.profilePhoto || "/default avatar.png";
+          if (item.type === "guest" && item.profileDisplayName === "Goku") {
+            profilePhoto = "/goku.jpeg";
+          } else if (
+            item.type === "guest" &&
+            item.profileDisplayName === "Vegeta"
+          ) {
+            profilePhoto = "/vegeta.jpg";
+          }
+          return {
+            id: item.id,
+            content: item.content,
+            keyID: crypto.randomUUID(),
+            createdAt: item.createdAt,
+            profileId: item.profileId,
+            likeCount: item.likeCount,
+            commentCount: item.commentCount,
+            profileDisplayName: item.profileDisplayName,
+            profileType: item.profileType,
+            profilePhoto: profilePhoto,
+          };
+        });
+        setLikedPosts(posts);
+        setAuth(true);
+      } else if (response.status === 401) {
+        setAuth(false);
+        localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+  const refreshLikedPosts = () =>
+    getLikedPosts(localStorage.getItem("authorization"));
+
+  const getCommentedPosts = async (authToken) => {
+    try {
+      const response = await fetch(`${apiUrl}/post/commented`, {
+        method: "GET",
+        headers: {
+          authorization: `${authToken}`,
+        },
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const posts = result.map((item) => {
+          let profilePhoto = item.profilePhoto || "/default avatar.png";
+          if (item.type === "guest" && item.profileDisplayName === "Goku") {
+            profilePhoto = "/goku.jpeg";
+          } else if (
+            item.type === "guest" &&
+            item.profileDisplayName === "Vegeta"
+          ) {
+            profilePhoto = "/vegeta.jpg";
+          }
+          return {
+            id: item.id,
+            content: item.content,
+            keyID: crypto.randomUUID(),
+            createdAt: item.createdAt,
+            profileId: item.profileId,
+            likeCount: item.likeCount,
+            commentCount: item.commentCount,
+            profileDisplayName: item.profileDisplayName,
+            profileType: item.profileType,
+            profilePhoto: profilePhoto,
+          };
+        });
+        setCommentedPosts(posts);
+        setAuth(true);
+      } else if (response.status === 401) {
+        setAuth(false);
+        localStorage.removeItem("authorization");
+        console.log(
+          "Unauthorized access - possibly due to expired token. Please log in again.",
+        );
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+  const refreshCommentedPosts = () =>
+    getCommentedPosts(localStorage.getItem("authorization"));
 
   const logout = () => {
     localStorage.removeItem("authorization");
     setAuth(false);
     setAccount(null);
+    setMyPosts(null);
     setHomePosts(null);
     setFollowings(null);
     setFollowers(null);
     setTrendingPosts(null);
     setExploreProfiles(null);
+    setLikedPosts(null);
     navigate("/", { replace: false });
   };
 
@@ -217,16 +519,23 @@ export function useAppLogic() {
     logout,
     setAuth,
     account,
-    refreshAccount: () => getAccountInfo(localStorage.getItem("authorization")),
+    refreshAccount,
     followings,
-    refreshFollowings: () =>
-      getFollowings(localStorage.getItem("authorization")),
+    refreshFollowings,
     followers,
-    refreshFollowers: () => getFollowers(localStorage.getItem("authorization")),
+    refreshFollowers,
     exploreProfiles,
-    refreshExploreProfiles: () =>
-      getExploreProfiles(localStorage.getItem("authorization")),
+    refreshExploreProfiles,
+    changeFollowingStatus,
     homePosts,
+    refreshHomePosts,
     trendingPosts,
+    refreshTrendingPosts,
+    myPosts,
+    refreshMyPosts,
+    likedPosts,
+    refreshLikedPosts,
+    commentedPosts,
+    refreshCommentedPosts,
   };
 }
