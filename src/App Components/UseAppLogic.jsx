@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
 export function useAppLogic() {
+  const { postID } = useParams();
   const [auth, setAuth] = useState(false);
   const [account, setAccount] = useState(null);
   const [homePosts, setHomePosts] = useState(null);
@@ -19,17 +20,32 @@ export function useAppLogic() {
 
   useEffect(() => {
     const authToken = localStorage.getItem("authorization");
-    if (authToken) {
-      getAccountInfo(authToken);
-      getFollowings(authToken);
-      getFollowers(authToken);
-      getExploreProfiles(authToken);
-      getMyPosts(authToken);
-      getHomePosts(authToken);
-      getTrendingPosts(authToken);
-      getLikedPosts(authToken);
-      getCommentedPosts(authToken);
-    }
+    if (!authToken) return;
+
+    const initializeApp = async () => {
+      try {
+        await Promise.all([
+          getAccountInfo(authToken),
+          getFollowings(authToken),
+          getFollowers(authToken),
+          getExploreProfiles(authToken),
+          getMyPosts(authToken),
+          getHomePosts(authToken),
+          getTrendingPosts(authToken),
+          getLikedPosts(authToken),
+          getCommentedPosts(authToken),
+        ]);
+
+        console.log("Initial app data loaded completely!");
+      } catch (error) {
+        console.error("Failed to initialize app data:", error);
+      } finally {
+        console.log("mounted either way");
+      }
+    };
+
+    initializeApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const tab = [
@@ -41,6 +57,14 @@ export function useAppLogic() {
     { link: "setting", label: "Setting", logo: "/cog.svg" },
   ];
 
+  const getProfilePhoto = (item) => {
+    if (item.type === "guest") {
+      if (item.profileDisplayName === "Goku") return "/goku.jpeg";
+      if (item.profileDisplayName === "Vegeta") return "/vegeta.jpg";
+    }
+    return item.profilePhoto || "/default avatar.png";
+  };
+
   const getAccountInfo = async (authToken) => {
     try {
       const response = await fetch(`${apiUrl}/user/self`, {
@@ -51,19 +75,6 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        let profilePhoto = result.profilePhoto || "/default avatar.png";
-        if (
-          result.profileType === "guest" &&
-          result.username === "goku@gmail.com"
-        ) {
-          profilePhoto = "/goku.jpeg";
-        } else if (
-          result.profileType === "guest" &&
-          result.username === "vegeta@gmail.com"
-        ) {
-          profilePhoto = "/vegeta.jpg";
-        }
-
         setAccount({
           id: result.id,
           profileId: result.profileID,
@@ -73,7 +84,7 @@ export function useAppLogic() {
           displayName: result.profileDisplayName,
           bio: result.profileBio || "No Bio Available",
           profileType: result.profileType,
-          photo: profilePhoto,
+          photo: getProfilePhoto(result),
           followingCount: result.followingCount,
           followersCount: result.followersCount,
         });
@@ -103,12 +114,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const neededItems = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.displayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (item.type === "guest" && item.displayName === "Vegeta") {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             userId: item.userId,
@@ -116,7 +121,7 @@ export function useAppLogic() {
             createdAt: item.createdAt,
             displayName: item.displayName,
             bio: item.bio || "No Bio Available",
-            photo: profilePhoto,
+            photo: getProfilePhoto(item),
             type: item.type,
           };
         });
@@ -147,12 +152,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const neededItems = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.displayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (item.type === "guest" && item.displayName === "Vegeta") {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             userId: item.userId,
@@ -160,7 +159,7 @@ export function useAppLogic() {
             createdAt: item.createdAt,
             displayName: item.displayName,
             bio: item.bio || "No Bio Available",
-            photo: profilePhoto,
+            photo: getProfilePhoto(item),
             type: item.type,
           };
         });
@@ -191,12 +190,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const neededItems = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.displayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (item.type === "guest" && item.displayName === "Vegeta") {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             userId: item.userId,
@@ -204,7 +197,7 @@ export function useAppLogic() {
             createdAt: item.createdAt,
             displayName: item.displayName,
             bio: item.bio || "No Bio Available",
-            photo: profilePhoto,
+            photo: getProfilePhoto(item),
             type: item.type,
           };
         });
@@ -244,13 +237,13 @@ export function useAppLogic() {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const err = await response.json();
-          alert(err.error || "Upload failed");
+          alert(err.error || "failed");
         } else {
-          alert("Upload failed: Server error");
+          alert("Server error");
         }
       }
     } catch (err) {
-      console.error("Upload Error:", err);
+      console.error("Error:", err);
     }
   };
 
@@ -265,15 +258,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const posts = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.profileDisplayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (
-            item.type === "guest" &&
-            item.profileDisplayName === "Vegeta"
-          ) {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             content: item.content,
@@ -284,7 +268,7 @@ export function useAppLogic() {
             commentCount: item.commentCount,
             profileDisplayName: item.profileDisplayName,
             profileType: item.profileType,
-            profilePhoto: profilePhoto,
+            profilePhoto: getProfilePhoto(item),
           };
         });
         setHomePosts(posts);
@@ -314,15 +298,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const posts = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.profileDisplayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (
-            item.type === "guest" &&
-            item.profileDisplayName === "Vegeta"
-          ) {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             content: item.content,
@@ -333,7 +308,7 @@ export function useAppLogic() {
             commentCount: item.commentCount,
             profileDisplayName: item.profileDisplayName,
             profileType: item.profileType,
-            profilePhoto: profilePhoto,
+            profilePhoto: getProfilePhoto(item),
           };
         });
         setTrendingPosts(posts);
@@ -363,15 +338,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const posts = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.profileDisplayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (
-            item.type === "guest" &&
-            item.profileDisplayName === "Vegeta"
-          ) {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             content: item.content,
@@ -382,7 +348,7 @@ export function useAppLogic() {
             commentCount: item.commentCount,
             profileDisplayName: item.profileDisplayName,
             profileType: item.profileType,
-            profilePhoto: profilePhoto,
+            profilePhoto: getProfilePhoto(item),
           };
         });
         setMyPosts(posts);
@@ -412,15 +378,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const posts = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.profileDisplayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (
-            item.type === "guest" &&
-            item.profileDisplayName === "Vegeta"
-          ) {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             content: item.content,
@@ -431,7 +388,7 @@ export function useAppLogic() {
             commentCount: item.commentCount,
             profileDisplayName: item.profileDisplayName,
             profileType: item.profileType,
-            profilePhoto: profilePhoto,
+            profilePhoto: getProfilePhoto(item),
           };
         });
         setLikedPosts(posts);
@@ -461,15 +418,6 @@ export function useAppLogic() {
       if (response.ok) {
         const result = await response.json();
         const posts = result.map((item) => {
-          let profilePhoto = item.profilePhoto || "/default avatar.png";
-          if (item.type === "guest" && item.profileDisplayName === "Goku") {
-            profilePhoto = "/goku.jpeg";
-          } else if (
-            item.type === "guest" &&
-            item.profileDisplayName === "Vegeta"
-          ) {
-            profilePhoto = "/vegeta.jpg";
-          }
           return {
             id: item.id,
             content: item.content,
@@ -480,7 +428,7 @@ export function useAppLogic() {
             commentCount: item.commentCount,
             profileDisplayName: item.profileDisplayName,
             profileType: item.profileType,
-            profilePhoto: profilePhoto,
+            profilePhoto: getProfilePhoto(item),
           };
         });
         setCommentedPosts(posts);
@@ -518,13 +466,13 @@ export function useAppLogic() {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const err = await response.json();
-          alert(err.error || "Upload failed");
+          alert(err.error || "failed");
         } else {
-          alert("Upload failed: Server error");
+          alert("Server error");
         }
       }
     } catch (err) {
-      console.error("Upload Error:", err);
+      console.error("Error:", err);
     }
   };
 
@@ -551,13 +499,13 @@ export function useAppLogic() {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const err = await response.json();
-          alert(err.error || "Upload failed");
+          alert(err.error || "failed");
         } else {
-          alert("Upload failed: Server error");
+          alert("Server error");
         }
       }
     } catch (err) {
-      console.error("Upload Error:", err);
+      console.error("Error:", err);
     }
   };
 
@@ -582,13 +530,13 @@ export function useAppLogic() {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           const err = await response.json();
-          alert(err.error || "Upload failed");
+          alert(err.error || "failed");
         } else {
-          alert("Upload failed: Server error");
+          alert("Server error");
         }
       }
     } catch (err) {
-      console.error("Upload Error:", err);
+      console.error("Error:", err);
     }
   };
 
@@ -607,6 +555,7 @@ export function useAppLogic() {
   };
 
   return {
+    postID,
     auth,
     tab,
     logout,

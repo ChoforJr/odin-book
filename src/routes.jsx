@@ -5,6 +5,7 @@ import Account from "./Account Components/Account";
 import { MyProfile } from "./MyProfile Components/MyProfile";
 import { TrendingPosts } from "./TrendingPosts Components/TrendingPosts";
 import { Follow } from "./Follow Components/Follow";
+import Post from "./Post Components/Post";
 import ErrorPage from "./ErrorPage";
 
 const routes = [
@@ -23,6 +24,7 @@ const routes = [
       { path: "follow", element: <Follow /> },
       { path: "myProfile", element: <MyProfile /> },
       { path: "setting", element: <Account /> },
+      { path: "post/:postID", element: <Post /> },
     ],
   },
 ];

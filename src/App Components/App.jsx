@@ -1,13 +1,13 @@
 import "./App.css";
 import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { ItemContext } from "../ItemContext";
 import { useAppLogic } from "./UseAppLogic";
 import { Plus } from "lucide-react";
 
 const App = () => {
   const {
+    postID,
     auth,
     tab,
     logout,
@@ -35,6 +35,7 @@ const App = () => {
   const postContentRef = useRef("");
 
   const value = {
+    postID,
     auth,
     logout,
     setAuth,
@@ -86,7 +87,7 @@ const App = () => {
       </main>
       <footer>
         Made by{" "}
-        <a href="https://github.com/ChoforJr/messaging-app" target="_blank">
+        <a href="https://github.com/ChoforJr/odin-book" target="_blank">
           Chofor Forsakang
         </a>
       </footer>

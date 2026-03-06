@@ -2,11 +2,18 @@ import styles from "./postCard.module.css";
 import { Heart, MessageCircle, Trash2 } from "lucide-react";
 import { useContext } from "react";
 import { ItemContext } from "../ItemContext";
+import { useNavigate } from "react-router-dom";
 
 export function PostCard({ post }) {
   const { likePost, deletePost, account } = useContext(ItemContext);
+  const navigate = useNavigate();
+
   return (
-    <article className={styles.postCard} key={post.keyID}>
+    <article
+      className={styles.postCard}
+      key={post.keyID}
+      onClick={() => navigate(`/post/${post.id}`, { replace: false })}
+    >
       <div className={styles.photoSection}>
         <img
           src={post.profilePhoto}
@@ -19,7 +26,7 @@ export function PostCard({ post }) {
       <div className={styles.contentSection}>
         <p>{post.content}</p>
       </div>
-      <div className={styles.postInfo}>
+      <div className={styles.postFeature}>
         <button onClick={(e) => likePost(e, post.id)}>
           <Heart size={25} /> {post.likeCount}
         </button>
