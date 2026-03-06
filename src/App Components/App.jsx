@@ -1,9 +1,9 @@
 import "./App.css";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { ItemContext } from "../ItemContext";
 import { useAppLogic } from "./UseAppLogic";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 const App = () => {
   const {
@@ -32,9 +32,23 @@ const App = () => {
   } = useAppLogic();
 
   const [postContent, setPostContent] = useState("");
-  const postContentRef = useRef("");
+  const postContentRef = useRef(null);
 
-  const value = {
+  const handleOpenPostDialog = useCallback(() => {
+    postContentRef.current?.showModal();
+  }, []);
+
+  const handleClosePostDialog = useCallback(() => {
+    postContentRef.current?.close();
+    setPostContent("");
+  }, []);
+
+  const handleCreatePost = useCallback(() => {
+    createPost(postContent);
+    handleClosePostDialog();
+  }, [postContent, createPost, handleClosePostDialog]);
+
+  const contextValue = {
     postID,
     auth,
     logout,
@@ -56,66 +70,82 @@ const App = () => {
     likePost,
     deletePost,
   };
+
   return (
     <div className="container">
-      <nav>
+      <nav className="sidebar">
         <h1 className="navBarHeader">
-          <Link to="/">
-            <img src="/logo.svg" alt="logo" width={40} />
-            Odin-Book
+          <Link to="/" className="logo-link">
+            <img src="/logo.svg" alt="Odin-Book logo" width={40} height={40} />
+            <span>Odin-Book</span>
           </Link>
         </h1>
-        <section>
+        <section className="nav-tabs">
           {tab.map((item) => (
-            <div className="tab" key={item.link}>
-              <img src={item.logo} alt={item.label} width={30} />
-              <Link to={`/${item.link}`}>{item.label}</Link>
-            </div>
+            <Link to={`/${item.link}`} key={item.link} className="tab-link">
+              <img src={item.logo} alt={item.label} width={24} height={24} />
+              <span>{item.label}</span>
+            </Link>
           ))}
-          <div
-            className="tab addPost"
-            onClick={() => postContentRef.current.showModal()}
+          <button
+            className="tab create-post-btn"
+            onClick={handleOpenPostDialog}
+            aria-label="Create a new post"
           >
-            <Plus size={25} /> Add Post
-          </div>
+            <Plus size={24} />
+            <span>Add Post</span>
+          </button>
         </section>
       </nav>
-      <main>
-        <ItemContext.Provider value={value}>
+      <main className="main-content">
+        <ItemContext.Provider value={contextValue}>
           <Outlet />
         </ItemContext.Provider>
       </main>
-      <footer>
-        Made by{" "}
-        <a href="https://github.com/ChoforJr/odin-book" target="_blank">
-          Chofor Forsakang
-        </a>
+      <footer className="app-footer">
+        <p>
+          Made by{" "}
+          <a
+            href="https://github.com/ChoforJr/odin-book"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Chofor Forsakang
+          </a>
+        </p>
       </footer>
-      <dialog ref={postContentRef}>
-        <h1>Create a Post</h1>
+      <dialog ref={postContentRef} className="post-dialog">
+        <div className="dialog-header">
+          <h2>Create a Post</h2>
+          <button
+            className="close-btn"
+            onClick={handleClosePostDialog}
+            aria-label="Close dialog"
+          >
+            <X size={24} />
+          </button>
+        </div>
         <textarea
-          name="content"
-          id="content"
-          placeholder="Something on my mind!!!"
+          className="post-textarea"
+          placeholder="What's on your mind?"
           minLength={4}
           maxLength={800}
           value={postContent}
           onChange={(e) => setPostContent(e.target.value)}
-        ></textarea>
-        <button
-          onClick={() => (
-            createPost(postContent),
-            postContentRef.current.close(),
-            setPostContent("")
-          )}
-        >
-          Post
-        </button>
-        <button
-          onClick={() => (postContentRef.current.close(), setPostContent(""))}
-        >
-          Cancel
-        </button>
+          aria-label="Post content"
+        />
+        <div className="dialog-actions">
+          <button
+            className="btn btn-primary"
+            onClick={handleCreatePost}
+            disabled={postContent.trim().length === 0}
+          >
+            Post
+          </button>
+          <button className="btn btn-secondary" onClick={handleClosePostDialog}>
+            Cancel
+          </button>
+        </div>
       </dialog>
     </div>
   );

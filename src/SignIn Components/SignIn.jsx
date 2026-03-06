@@ -1,7 +1,8 @@
 import styles from "./signIn.module.css";
-import { useState, useContext } from "react";
+import { useState, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ItemContext } from "../ItemContext";
+import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
 const SignIn = () => {
@@ -15,8 +16,14 @@ const SignIn = () => {
     confirmPassword: "",
     displayName: "",
   });
-  const [signIn, setSignIn] = useState(true);
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    login: false,
+    signup: false,
+    confirm: false,
+  });
+
   const {
     setAuth,
     refreshAccount,
@@ -25,247 +32,359 @@ const SignIn = () => {
     refreshFollowers,
   } = useContext(ItemContext);
 
-  function onChangeHandlerLogin(event) {
-    const { name, value } = event.target;
-    setLogin((prevLogin) => ({
-      ...prevLogin,
-      [name]: value,
-    }));
-  }
-
-  function onChangeHandlerSignup(event) {
-    const { name, value } = event.target;
-    setSignUp((prevLogin) => ({
-      ...prevLogin,
-      [name]: value,
-    }));
-  }
-
   const navigate = useNavigate();
 
-  const handleLoginSubmit = async (e, username, password) => {
-    e.preventDefault();
+  const handleLoginChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setLogin((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-    if (!username || !password) {
-      return alert("You need to fill in all fields");
-    }
-    setLoading(true);
+  const handleSignUpChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setSignUp((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-    try {
-      const response = await fetch(`${apiUrl}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: `${username}`,
-          password: `${password}`,
-        }),
-      });
+  const handleLoginSubmit = useCallback(
+    async (e, username = login.username, password = login.password) => {
+      e?.preventDefault?.();
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("authorization", `Bearer ${data.token}`);
-        setAuth(true);
-        refreshAccount();
-        refreshFollowings();
-        refreshExploreProfiles();
-        refreshFollowers();
-        navigate("/setting", { replace: false });
-      } else if (response.status === 400) {
-        const errorMessages = data.errors.map((err) => err.msg).join("\n");
-        alert(`Format Error:\n${errorMessages}`);
-      } else if (response.status === 401) {
-        alert(data.error || "Login failed: Invalid credentials");
-      } else {
-        alert("An unexpected error occurred. Please try again.");
+      if (!username || !password) {
+        return alert("Please fill in all fields");
       }
-    } catch (error) {
-      console.error("Network error:", error);
-      alert("Connection to server failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
 
-  const handleSignUpSubmit = async (e) => {
-    e.preventDefault();
+      try {
+        const response = await fetch(`${apiUrl}/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+        });
 
-    if (
-      !signUp.username ||
-      !signUp.password ||
-      !signUp.displayName ||
-      !signUp.confirmPassword
-    ) {
-      return alert("You need to fill in all the fields");
-    }
+        const data = await response.json();
 
-    if (signUp.password !== signUp.confirmPassword) {
-      return alert("Passwords do not match");
-    }
-    setLoading(true);
-
-    try {
-      const response = await fetch(`${apiUrl}/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(signUp),
-      });
-
-      if (response.status === 200) {
-        alert("Account created successfully!");
-        localStorage.removeItem("authorization");
-        setAuth(false);
-        setSignIn(true);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (response.status === 400 || response.status === 422) {
-        if (data.errors) {
+        if (response.ok) {
+          localStorage.setItem("authorization", `Bearer ${data.token}`);
+          setAuth(true);
+          await Promise.all([
+            refreshAccount(),
+            refreshFollowings(),
+            refreshExploreProfiles(),
+            refreshFollowers(),
+          ]);
+          navigate("/setting", { replace: true });
+        } else if (response.status === 400) {
           const errorMessages = data.errors.map((err) => err.msg).join("\n");
-          alert(`Validation Errors:\n${errorMessages}`);
+          alert(`Validation Error:\n${errorMessages}`);
+        } else if (response.status === 401) {
+          alert(data.error || "Invalid credentials");
         } else {
-          alert(data.message || "Registration failed");
+          alert("An unexpected error occurred");
         }
-      } else {
-        alert("An unexpected error occurred.");
+      } catch (error) {
+        console.error("Network error:", error);
+        alert("Connection failed. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Network error:", error);
-      alert("Could not connect to the server.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [
+      login,
+      setAuth,
+      refreshAccount,
+      refreshFollowings,
+      refreshExploreProfiles,
+      refreshFollowers,
+      navigate,
+    ],
+  );
+
+  const handleSignUpSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      if (
+        !signUp.username ||
+        !signUp.password ||
+        !signUp.displayName ||
+        !signUp.confirmPassword
+      ) {
+        return alert("Please fill in all fields");
+      }
+
+      if (signUp.password !== signUp.confirmPassword) {
+        return alert("Passwords do not match");
+      }
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(signUp),
+        });
+
+        if (response.status === 200) {
+          alert("Account created successfully! Please log in.");
+          setSignUp({
+            username: "",
+            password: "",
+            confirmPassword: "",
+            displayName: "",
+          });
+          setIsLoginMode(true);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (response.status === 400 || response.status === 422) {
+          if (data.errors) {
+            const errorMessages = data.errors.map((err) => err.msg).join("\n");
+            alert(`Validation Error:\n${errorMessages}`);
+          } else {
+            alert(data.message || "Registration failed");
+          }
+        } else {
+          alert("An unexpected error occurred");
+        }
+      } catch (error) {
+        console.error("Network error:", error);
+        alert("Connection failed. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [signUp],
+  );
+
+  const toggleGuestLogin = useCallback(
+    (email, password) => {
+      const event = { preventDefault: () => {} };
+      handleLoginSubmit(event, email, password);
+    },
+    [handleLoginSubmit],
+  );
 
   return (
-    <div className={styles.signIn}>
-      <section>
-        {signIn ? (
-          <>
-            <button onClick={() => setSignIn(false)} className={styles.switch}>
-              Sign-Up Instead
-            </button>
-            <h1>Log-In</h1>
-            <label htmlFor="username">
-              Username:{" "}
-              <input
-                type="email"
-                name="username"
-                id="username"
-                value={login.username}
-                onChange={onChangeHandlerLogin}
-                min={8}
-                max={64}
-              />
-            </label>
-            <label htmlFor="password">
-              Password:{" "}
-              <input
-                type="password"
-                name="password"
-                id="password"
-                value={login.password}
-                onChange={onChangeHandlerLogin}
-                min={4}
-                max={64}
-              />
-            </label>
+    <div className={styles.container}>
+      <div className={styles.signIn}>
+        <section className={styles.formSection}>
+          <div className={styles.formHeader}>
+            <h1>{isLoginMode ? "Welcome Back" : "Create Account"}</h1>
             <button
-              onClick={(e) =>
-                handleLoginSubmit(e, login.username, login.password)
-              }
-              className={styles.submit}
-              disabled={loading}
+              className={styles.switchBtn}
+              onClick={() => setIsLoginMode(!isLoginMode)}
             >
-              {loading ? "Logging in..." : "Submit"}
+              {isLoginMode
+                ? "Need an account? Sign up"
+                : "Have an account? Log in"}
             </button>
-          </>
-        ) : (
-          <>
-            <button onClick={() => setSignIn(true)} className={styles.switch}>
-              Log-In Instead
-            </button>
-            <h1>Sign-Up</h1>
-            <label htmlFor="username">
-              Username:{" "}
-              <input
-                type="email"
-                name="username"
-                id="username"
-                value={signUp.username}
-                onChange={onChangeHandlerSignup}
-                min={8}
-                max={64}
-              />
-            </label>
-            <label htmlFor="displayName">
-              Display Name:{" "}
-              <input
-                type="text"
-                name="displayName"
-                id="displayName"
-                value={signUp.displayName}
-                onChange={onChangeHandlerSignup}
-                min={4}
-                max={64}
-              />
-            </label>
-            <label htmlFor="password">
-              Password:{" "}
-              <input
-                type="password"
-                name="password"
-                id="password"
-                value={signUp.password}
-                onChange={onChangeHandlerSignup}
-                min={4}
-                max={64}
-              />
-            </label>
-            <label htmlFor="confirmPassword">
-              Confirm Password:{" "}
-              <input
-                type="password"
-                name="confirmPassword"
-                id="confirmPassword"
-                value={signUp.confirmPassword}
-                onChange={onChangeHandlerSignup}
-                min={4}
-                max={64}
-              />
-            </label>
-            <button
-              onClick={handleSignUpSubmit}
-              className={styles.submit}
-              disabled={loading}
-            >
-              {loading ? "Signing Up..." : "Submit"}
-            </button>
-          </>
-        )}
-      </section>
-      <h1>OR</h1>
-      <section className={styles.guest}>
-        <h1>LOGIN AS</h1>
-        <article
-          onClick={(e) => handleLoginSubmit(e, "goku@gmail.com", "1234")}
-        >
-          <img src="/goku.jpeg" alt="Goku profile photo" />
-          <h2>Goku</h2>
-        </article>
-        <article
-          onClick={(e) => handleLoginSubmit(e, "vegeta@gmail.com", "1234")}
-        >
-          <img src="/vegeta.jpg" alt="Vegeta profile photo" />
-          <h2>Vegeta</h2>
-        </article>
-      </section>
+          </div>
+
+          {isLoginMode ? (
+            <form onSubmit={handleLoginSubmit} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="login-username">Email or Username</label>
+                <div className={styles.inputWrapper}>
+                  <Mail size={18} className={styles.inputIcon} />
+                  <input
+                    id="login-username"
+                    type="text"
+                    name="username"
+                    value={login.username}
+                    onChange={handleLoginChange}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label htmlFor="login-password">Password</label>
+                <div className={styles.inputWrapper}>
+                  <Lock size={18} className={styles.inputIcon} />
+                  <input
+                    id="login-password"
+                    type={showPasswords.login ? "text" : "password"}
+                    name="password"
+                    value={login.password}
+                    onChange={handleLoginChange}
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className={styles.togglePassword}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        login: !prev.login,
+                      }))
+                    }
+                  >
+                    {showPasswords.login ? (
+                      <Eye size={18} />
+                    ) : (
+                      <EyeOff size={18} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className={styles.submitBtn}
+                disabled={loading}
+              >
+                {loading ? "Logging in..." : "Log In"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignUpSubmit} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="signup-email">Email</label>
+                <div className={styles.inputWrapper}>
+                  <Mail size={18} className={styles.inputIcon} />
+                  <input
+                    id="signup-email"
+                    type="email"
+                    name="username"
+                    value={signUp.username}
+                    onChange={handleSignUpChange}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label htmlFor="signup-displayName">Display Name</label>
+                <div className={styles.inputWrapper}>
+                  <User size={18} className={styles.inputIcon} />
+                  <input
+                    id="signup-displayName"
+                    type="text"
+                    name="displayName"
+                    value={signUp.displayName}
+                    onChange={handleSignUpChange}
+                    placeholder="Your Name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label htmlFor="signup-password">Password</label>
+                <div className={styles.inputWrapper}>
+                  <Lock size={18} className={styles.inputIcon} />
+                  <input
+                    id="signup-password"
+                    type={showPasswords.signup ? "text" : "password"}
+                    name="password"
+                    value={signUp.password}
+                    onChange={handleSignUpChange}
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className={styles.togglePassword}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        signup: !prev.signup,
+                      }))
+                    }
+                  >
+                    {showPasswords.signup ? (
+                      <Eye size={18} />
+                    ) : (
+                      <EyeOff size={18} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label htmlFor="signup-confirm">Confirm Password</label>
+                <div className={styles.inputWrapper}>
+                  <Lock size={18} className={styles.inputIcon} />
+                  <input
+                    id="signup-confirm"
+                    type={showPasswords.confirm ? "text" : "password"}
+                    name="confirmPassword"
+                    value={signUp.confirmPassword}
+                    onChange={handleSignUpChange}
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className={styles.togglePassword}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        confirm: !prev.confirm,
+                      }))
+                    }
+                  >
+                    {showPasswords.confirm ? (
+                      <Eye size={18} />
+                    ) : (
+                      <EyeOff size={18} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className={styles.submitBtn}
+                disabled={loading}
+              >
+                {loading ? "Creating account..." : "Sign Up"}
+              </button>
+            </form>
+          )}
+        </section>
+
+        <div className={styles.divider}>
+          <span>OR</span>
+        </div>
+
+        <section className={styles.guestSection}>
+          <h2>Demo Accounts</h2>
+          <button
+            className={styles.guestBtn}
+            onClick={() => toggleGuestLogin("goku@gmail.com", "1234")}
+            disabled={loading}
+          >
+            <img src="/goku.jpeg" alt="Goku" />
+            <div>
+              <h3>Goku</h3>
+              <p>Demo Account</p>
+            </div>
+          </button>
+          <button
+            className={styles.guestBtn}
+            onClick={() => toggleGuestLogin("vegeta@gmail.com", "1234")}
+            disabled={loading}
+          >
+            <img src="/vegeta.jpg" alt="Vegeta" />
+            <div>
+              <h3>Vegeta</h3>
+              <p>Demo Account</p>
+            </div>
+          </button>
+        </section>
+      </div>
     </div>
   );
 };

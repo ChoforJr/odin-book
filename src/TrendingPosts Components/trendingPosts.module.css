@@ -1,10 +1,40 @@
 .trendingPosts {
-  color: #e6e6fa;
   display: flex;
-  flex-wrap: wrap;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
   gap: 1.5rem;
-  padding: 2rem 1rem;
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.noPosts {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trendingPosts {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .noPosts {
+    padding: 2rem 1rem;
+  }
 }

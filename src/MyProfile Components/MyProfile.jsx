@@ -1,6 +1,6 @@
 import styles from "./myProfile.module.css";
 import { ItemContext } from "../ItemContext";
-import { useContext, useState } from "react";
+import { useContext, useState, useCallback } from "react";
 import { ProfileCard } from "../ProfileCard component/ProfileCard";
 import { PostCard } from "../PostCard component/PostCard";
 
@@ -15,14 +15,53 @@ export const MyProfile = () => {
     followers,
   } = useContext(ItemContext);
 
-  const [selectNavBar, setSelectNavBar] = useState("Post");
+  const [activeTab, setActiveTab] = useState("Post");
 
-  if (!auth || !account)
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab);
+  }, []);
+
+  if (!auth || !account) {
     return (
       <div className={styles.loginMsg}>
-        <h1>Please Log In to see your Profile.</h1>
+        <h1>Please Log In to view your profile</h1>
+        <p>Sign in to see your posts, followers, and more.</p>
       </div>
     );
+  }
+
+  const tabs = [
+    { id: "Post", label: "Posts" },
+    { id: "Liked", label: "Liked Posts" },
+    { id: "Commented On", label: "Commented On" },
+    { id: "Followers", label: "Followers" },
+    { id: "Followings", label: "Following" },
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "Post":
+        return myPosts?.map((post) => <PostCard post={post} key={post.id} />);
+      case "Liked":
+        return likedPosts?.map((post) => (
+          <PostCard post={post} key={post.id} />
+        ));
+      case "Commented On":
+        return commentedPosts?.map((post) => (
+          <PostCard post={post} key={post.id} />
+        ));
+      case "Followers":
+        return followers?.map((profile) => (
+          <ProfileCard profile={profile} key={profile.id} />
+        ));
+      case "Followings":
+        return followings?.map((profile) => (
+          <ProfileCard profile={profile} key={profile.id} />
+        ));
+      default:
+        return null;
+    }
+  };
 
   return (
     <section className={styles.myProfile}>
@@ -30,51 +69,50 @@ export const MyProfile = () => {
         <div className={styles.photoSection}>
           <img
             src={account.photo}
-            alt="Profile"
+            alt={account.displayName}
             className={styles.profileImg}
           />
         </div>
         <div className={styles.basicInfo}>
           <h2>{account.displayName}</h2>
-          <p>{account.username}</p>
-          <p>Joined: {new Date(account.createdAt).toLocaleDateString()}</p>
-          <p>Bio: {account.bio}</p>
+          <p className={styles.username}>@{account.username}</p>
+          <p className={styles.joinDate}>
+            Joined {new Date(account.createdAt).toLocaleDateString()}
+          </p>
+          <p className={styles.bio}>{account.bio}</p>
           <div className={styles.basicInfoFollows}>
-            <p>Following: {account.followingCount}</p>
-            <p>Followers: {account.followersCount}</p>
+            <div className={styles.followItem}>
+              <span className={styles.followCount}>
+                {account.followingCount}
+              </span>
+              <span className={styles.followLabel}>Following</span>
+            </div>
+            <div className={styles.followItem}>
+              <span className={styles.followCount}>
+                {account.followersCount}
+              </span>
+              <span className={styles.followLabel}>Followers</span>
+            </div>
           </div>
         </div>
       </article>
-      <article className={styles.navBar}>
-        <button onClick={() => setSelectNavBar("Post")}>Post</button>
-        <button onClick={() => setSelectNavBar("Liked")}>Liked</button>
-        <button onClick={() => setSelectNavBar("Commented On")}>
-          Commented On
-        </button>
-        <button onClick={() => setSelectNavBar("Followers")}>Followers</button>
-        <button onClick={() => setSelectNavBar("Followings")}>
-          Followings
-        </button>
-      </article>
-      <h1>{selectNavBar}</h1>
-      <article>
-        {selectNavBar === "Post" &&
-          myPosts.map((post) => <PostCard post={post} key={post.keyID} />)}
-        {selectNavBar === "Liked" &&
-          likedPosts.map((post) => <PostCard post={post} key={post.keyID} />)}
-        {selectNavBar === "Commented On" &&
-          commentedPosts.map((post) => (
-            <PostCard post={post} key={post.keyID} />
-          ))}
-        {selectNavBar === "Followers" &&
-          followers.map((profile) => (
-            <ProfileCard profile={profile} key={profile.keyID} />
-          ))}
-        {selectNavBar === "Followings" &&
-          followings.map((profile) => (
-            <ProfileCard profile={profile} key={profile.keyID} />
-          ))}
-      </article>
+
+      <nav className={styles.tabNavigation}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`${styles.tabBtn} ${activeTab === tab.id ? styles.active : ""}`}
+            onClick={() => handleTabChange(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className={styles.contentArea}>
+        <h3 className={styles.contentTitle}>{activeTab}</h3>
+        <article className={styles.contentList}>{renderContent()}</article>
+      </div>
     </section>
   );
 };

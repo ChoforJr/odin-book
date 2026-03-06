@@ -2,8 +2,7 @@ import styles from "./post.module.css";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { ItemContext } from "../ItemContext";
 import { useContext } from "react";
-import { Link } from "react-router-dom";
-import { Heart, Trash2 } from "lucide-react";
+import { Heart, Trash2, Send } from "lucide-react";
 
 const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
@@ -24,7 +23,6 @@ const Post = () => {
   } = useContext(ItemContext);
 
   const registry = useMemo(() => {
-    console.log("Rebuilding Map...");
     return new Map(
       [
         ...(homePosts ?? []),
@@ -45,6 +43,7 @@ const Post = () => {
     }
     return item.profilePhoto || "/default avatar.png";
   };
+
   const getPostComment = useCallback(async () => {
     const authToken = localStorage.getItem("authorization");
     if (!postID) return;
@@ -55,9 +54,7 @@ const Post = () => {
       });
 
       if (!response.ok) {
-        console.error(
-          `Error ${response.status}: mapping to HTML or missing route.`,
-        );
+        console.error(`Error ${response.status}: Failed to fetch comments`);
         return;
       }
       const contentType = response.headers.get("content-type");
@@ -77,11 +74,11 @@ const Post = () => {
       }));
 
       setPostComment(comments);
-      console.log("Comments successfully refreshed");
     } catch (error) {
       console.error("Network error:", error);
     }
   }, [postID]);
+
   const refreshPostComment = useCallback(
     () => getPostComment(),
     [getPostComment],
@@ -91,99 +88,105 @@ const Post = () => {
     refreshPostComment();
   }, [postID, refreshPostComment]);
 
-  async function submitComment(event, addComment) {
-    event.preventDefault();
+  const submitComment = useCallback(
+    async (event) => {
+      event.preventDefault();
 
-    if (addComment == "") {
-      return alert("You can't submit an empty field");
-    }
-
-    const authToken = localStorage.getItem("authorization");
-
-    try {
-      const response = await fetch(`${apiUrl}/comment/${postID}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `${authToken}`,
-        },
-        body: JSON.stringify({
-          content: addComment,
-        }),
-      });
-
-      if (response.ok) {
-        setAddComment("");
-        refreshPostComment();
-      } else {
-        const result = await response.json();
-        console.error(result);
+      if (addComment.trim() === "") {
+        return alert("Comment cannot be empty");
       }
-    } catch (error) {
-      console.error("Network error:", error);
-    }
-  }
 
-  const likeComment = async (e, commentID) => {
-    e.stopPropagation();
-    let authToken = localStorage.getItem("authorization");
-    try {
-      const response = await fetch(`${apiUrl}/comment/like`, {
-        method: "PATCH",
-        headers: {
-          authorization: `${authToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ commentID }),
-      });
+      const authToken = localStorage.getItem("authorization");
 
-      if (response.ok) {
-        refreshPostComment();
-      } else {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const err = await response.json();
-          alert(err.error || "failed");
+      try {
+        const response = await fetch(`${apiUrl}/comment/${postID}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authToken,
+          },
+          body: JSON.stringify({
+            content: addComment,
+          }),
+        });
+
+        if (response.ok) {
+          setAddComment("");
+          refreshPostComment();
         } else {
-          alert(" Server error");
+          const result = await response.json();
+          console.error(result);
         }
+      } catch (error) {
+        console.error("Network error:", error);
       }
-    } catch (err) {
-      console.error(" Error:", err);
-    }
-  };
+    },
+    [addComment, postID, refreshPostComment],
+  );
 
-  const deleteComment = async (e, commentID) => {
-    e.stopPropagation();
-    let authToken = localStorage.getItem("authorization");
-    try {
-      const response = await fetch(`${apiUrl}/comment/${commentID}`, {
-        method: "DELETE",
-        headers: {
-          authorization: `${authToken}`,
-        },
-      });
+  const likeComment = useCallback(
+    async (e, commentID) => {
+      e.stopPropagation();
+      const authToken = localStorage.getItem("authorization");
+      try {
+        const response = await fetch(`${apiUrl}/comment/like`, {
+          method: "PATCH",
+          headers: {
+            authorization: authToken,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ commentID }),
+        });
 
-      if (response.ok) {
-        refreshPostComment();
-      } else {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const err = await response.json();
-          alert(err.error || "failed");
+        if (response.ok) {
+          refreshPostComment();
         } else {
-          alert("Server error");
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const err = await response.json();
+            alert(err.error || "Failed to like comment");
+          }
         }
+      } catch (err) {
+        console.error("Error:", err);
       }
-    } catch (err) {
-      console.error(" Error:", err);
-    }
-  };
+    },
+    [refreshPostComment],
+  );
+
+  const deleteComment = useCallback(
+    async (e, commentID) => {
+      e.stopPropagation();
+      const authToken = localStorage.getItem("authorization");
+      try {
+        const response = await fetch(`${apiUrl}/comment/${commentID}`, {
+          method: "DELETE",
+          headers: {
+            authorization: authToken,
+          },
+        });
+
+        if (response.ok) {
+          refreshPostComment();
+        } else {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const err = await response.json();
+            alert(err.error || "Failed to delete comment");
+          }
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    },
+    [refreshPostComment],
+  );
 
   if (!auth || !account) {
     return (
       <div className={styles.postFail}>
-        <h1>Please Log In to see your Profile.</h1>
+        <h1>Please Log In to view posts</h1>
+        <p>Sign in to see detailed post and comments.</p>
       </div>
     );
   }
@@ -199,28 +202,39 @@ const Post = () => {
 
   return (
     <section className={styles.post}>
-      <article className={styles.postHeader}>
-        <div className={styles.photoSection}>
-          <img
-            src={currentPost.profilePhoto}
-            alt="Profile photo"
-            className={styles.profileImg}
-          />
-          <h2>{currentPost.profileDisplayName}</h2>
-          <p>{new Date(currentPost.createdAt).toLocaleString()}</p>
-        </div>
-        <div className={styles.contentSection}>
-          <p>{currentPost.content}</p>
-        </div>
-        <div className={styles.postInfo}>
-          <button onClick={(e) => likePost(e, postID)}>
-            <Heart size={25} /> {currentPost.likeCount}
-          </button>
-          {account.profileId === currentPost.profileId && (
-            <button onClick={(e) => deletePost(e, postID)}>
-              <Trash2 size={25} color="red" />
+      <article className={styles.postArticle}>
+        <div className={styles.postHeader}>
+          <div className={styles.photoSection}>
+            <img
+              src={currentPost.profilePhoto}
+              alt={currentPost.profileDisplayName}
+              className={styles.profileImg}
+            />
+            <div>
+              <h2>{currentPost.profileDisplayName}</h2>
+              <p>{new Date(currentPost.createdAt).toLocaleString()}</p>
+            </div>
+          </div>
+          <div className={styles.contentSection}>
+            <p>{currentPost.content}</p>
+          </div>
+          <div className={styles.postInfo}>
+            <button
+              onClick={(e) => likePost(e, postID)}
+              aria-label={`Like post (${currentPost.likeCount} likes)`}
+            >
+              <Heart size={20} />
+              <span>{currentPost.likeCount}</span>
             </button>
-          )}
+            {account.profileId === currentPost.profileId && (
+              <button
+                onClick={(e) => deletePost(e, postID)}
+                aria-label="Delete post"
+              >
+                <Trash2 size={20} />
+              </button>
+            )}
+          </div>
         </div>
       </article>
 
@@ -231,43 +245,60 @@ const Post = () => {
           type="text"
           name="addComment"
           id="addComment"
-          placeholder="reply..."
+          placeholder="Write a reply..."
           value={addComment}
           onChange={(e) => setAddComment(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" && addComment.trim()) {
+              submitComment(e);
+            }
+          }}
         />
-        <button onClick={(e) => submitComment(e, addComment)}>Reply</button>
+        <button
+          onClick={submitComment}
+          disabled={addComment.trim().length === 0}
+          aria-label="Send comment"
+        >
+          <Send size={18} />
+        </button>
       </div>
 
-      <article className={styles.comments}>
-        <p>Comments</p>
-        {postComment &&
-          postComment.map((comment) => (
+      {postComment && postComment.length > 0 && (
+        <article className={styles.comments}>
+          <p>
+            {postComment.length} Comment{postComment.length !== 1 ? "s" : ""}
+          </p>
+          {postComment.map((comment) => (
             <article className={styles.comment} key={comment.id}>
               <div className={styles.photoSection}>
                 <img
                   src={comment.profilePhoto}
-                  alt="Profile photo"
+                  alt={comment.profileDisplayName}
                   className={styles.profileImg}
                 />
-                <h2>{comment.profileDisplayName}</h2>
-                <p>{new Date(comment.createdAt).toLocaleString()}</p>
+                <div>
+                  <h2>{comment.profileDisplayName}</h2>
+                  <p>{new Date(comment.createdAt).toLocaleString()}</p>
+                </div>
               </div>
               <div className={styles.contentSection}>
                 <p>{comment.content}</p>
               </div>
               <div className={styles.commentFeature}>
                 <button onClick={(e) => likeComment(e, comment.id)}>
-                  <Heart size={25} /> {comment.likeCount}
+                  <Heart size={18} />
+                  <span>{comment.likeCount}</span>
                 </button>
                 {account.profileId === comment.profileId && (
                   <button onClick={(e) => deleteComment(e, comment.id)}>
-                    <Trash2 size={25} color="red" />
+                    <Trash2 size={18} />
                   </button>
                 )}
               </div>
             </article>
           ))}
-      </article>
+        </article>
+      )}
     </section>
   );
 };
