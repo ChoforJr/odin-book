@@ -37,11 +37,15 @@ const Post = () => {
   const currentPost = registry.get(Number(postID));
 
   const getProfilePhoto = (item) => {
-    if (item.type === "guest") {
-      if (item.profileDisplayName === "Goku") return "/goku.jpeg";
-      if (item.profileDisplayName === "Vegeta") return "/vegeta.jpg";
+    const type = item.type || item.profileType;
+    const displayName = item.displayName || item.profileDisplayName;
+    const photo = item.photo || item.profilePhoto;
+
+    if (type === "guest") {
+      if (displayName === "Goku") return "/goku.jpeg";
+      if (displayName === "Vegeta") return "/vegeta.jpg";
     }
-    return item.profilePhoto || "/default avatar.png";
+    return photo || "/default avatar.png";
   };
 
   const getPostComment = useCallback(async () => {

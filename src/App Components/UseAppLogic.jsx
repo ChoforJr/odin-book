@@ -58,12 +58,41 @@ export function useAppLogic() {
   ];
 
   const getProfilePhoto = (item) => {
-    if (item.type === "guest") {
-      if (item.profileDisplayName === "Goku") return "/goku.jpeg";
-      if (item.profileDisplayName === "Vegeta") return "/vegeta.jpg";
+    const type = item.type || item.profileType;
+    const displayName = item.displayName || item.profileDisplayName;
+    const photo = item.photo || item.profilePhoto;
+
+    if (type === "guest") {
+      if (displayName === "Goku") return "/goku.jpeg";
+      if (displayName === "Vegeta") return "/vegeta.jpg";
     }
-    return item.profilePhoto || "/default avatar.png";
+    return photo || "/default avatar.png";
   };
+  const normalizeProfile = (item) => ({
+    id: item.id || item.profileId,
+    userId: item.userId || item.id,
+    keyID: crypto.randomUUID(),
+    createdAt: item.createdAt,
+    displayName: item.displayName || item.profileDisplayName,
+    username: item.username || "",
+    bio: item.bio || item.profileBio || "No Bio Available",
+    type: item.type || item.profileType,
+    photo: getProfilePhoto(item),
+    followingCount: item.followingCount,
+    followersCount: item.followersCount,
+  });
+  const normalizePost = (item) => ({
+    id: item.id,
+    content: item.content,
+    keyID: crypto.randomUUID(),
+    createdAt: item.createdAt,
+    profileId: item.profileId,
+    likeCount: item.likeCount,
+    commentCount: item.commentCount,
+    profileDisplayName: item.profileDisplayName,
+    profileType: item.profileType,
+    profilePhoto: getProfilePhoto(item),
+  });
 
   const getAccountInfo = async (authToken) => {
     try {
@@ -75,19 +104,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        setAccount({
-          id: result.id,
-          profileId: result.profileID,
-          keyID: crypto.randomUUID(),
-          username: result.username,
-          createdAt: result.createdAt,
-          displayName: result.profileDisplayName,
-          bio: result.profileBio || "No Bio Available",
-          profileType: result.profileType,
-          photo: getProfilePhoto(result),
-          followingCount: result.followingCount,
-          followersCount: result.followersCount,
-        });
+        setAccount(normalizeProfile(result));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -113,19 +130,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const neededItems = result.map((item) => {
-          return {
-            id: item.id,
-            userId: item.userId,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            displayName: item.displayName,
-            bio: item.bio || "No Bio Available",
-            photo: getProfilePhoto(item),
-            type: item.type,
-          };
-        });
-        setFollowings(neededItems);
+        setFollowings(result.map(normalizeProfile));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -151,19 +156,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const neededItems = result.map((item) => {
-          return {
-            id: item.id,
-            userId: item.userId,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            displayName: item.displayName,
-            bio: item.bio || "No Bio Available",
-            photo: getProfilePhoto(item),
-            type: item.type,
-          };
-        });
-        setFollowers(neededItems);
+        setFollowers(result.map(normalizeProfile));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -189,19 +182,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const neededItems = result.map((item) => {
-          return {
-            id: item.id,
-            userId: item.userId,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            displayName: item.displayName,
-            bio: item.bio || "No Bio Available",
-            photo: getProfilePhoto(item),
-            type: item.type,
-          };
-        });
-        setExploreProfiles(neededItems);
+        setExploreProfiles(result.map(normalizeProfile));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -257,21 +238,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const posts = result.map((item) => {
-          return {
-            id: item.id,
-            content: item.content,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            profileId: item.profileId,
-            likeCount: item.likeCount,
-            commentCount: item.commentCount,
-            profileDisplayName: item.profileDisplayName,
-            profileType: item.profileType,
-            profilePhoto: getProfilePhoto(item),
-          };
-        });
-        setHomePosts(posts);
+        setHomePosts(result.map(normalizePost));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -297,21 +264,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const posts = result.map((item) => {
-          return {
-            id: item.id,
-            content: item.content,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            profileId: item.profileId,
-            likeCount: item.likeCount,
-            commentCount: item.commentCount,
-            profileDisplayName: item.profileDisplayName,
-            profileType: item.profileType,
-            profilePhoto: getProfilePhoto(item),
-          };
-        });
-        setTrendingPosts(posts);
+        setTrendingPosts(result.map(normalizePost));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -337,21 +290,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const posts = result.map((item) => {
-          return {
-            id: item.id,
-            content: item.content,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            profileId: item.profileId,
-            likeCount: item.likeCount,
-            commentCount: item.commentCount,
-            profileDisplayName: item.profileDisplayName,
-            profileType: item.profileType,
-            profilePhoto: getProfilePhoto(item),
-          };
-        });
-        setMyPosts(posts);
+        setMyPosts(result.map(normalizePost));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -377,21 +316,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const posts = result.map((item) => {
-          return {
-            id: item.id,
-            content: item.content,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            profileId: item.profileId,
-            likeCount: item.likeCount,
-            commentCount: item.commentCount,
-            profileDisplayName: item.profileDisplayName,
-            profileType: item.profileType,
-            profilePhoto: getProfilePhoto(item),
-          };
-        });
-        setLikedPosts(posts);
+        setLikedPosts(result.map(normalizePost));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
@@ -417,21 +342,7 @@ export function useAppLogic() {
       });
       if (response.ok) {
         const result = await response.json();
-        const posts = result.map((item) => {
-          return {
-            id: item.id,
-            content: item.content,
-            keyID: crypto.randomUUID(),
-            createdAt: item.createdAt,
-            profileId: item.profileId,
-            likeCount: item.likeCount,
-            commentCount: item.commentCount,
-            profileDisplayName: item.profileDisplayName,
-            profileType: item.profileType,
-            profilePhoto: getProfilePhoto(item),
-          };
-        });
-        setCommentedPosts(posts);
+        setCommentedPosts(result.map(normalizePost));
         setAuth(true);
       } else if (response.status === 401) {
         setAuth(false);
