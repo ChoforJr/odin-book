@@ -4,6 +4,10 @@
 
 ---
 
+### API Repository
+
+[ChoforJr/odin-book-api](https://github.com/ChoforJr/odin-book-api)
+
 ## 📋 Overview
 
 ODIN-BOOK is a social media application that enables users to:
@@ -149,10 +153,6 @@ Try the application instantly with these demo accounts:
 ## 🔌 API Documentation
 
 This frontend connects to the **ODIN-BOOK API** for all data operations.
-
-### API Repository
-
-[ChoforJr/odin-book-api](https://github.com/ChoforJr/odin-book-api)
 
 ## 📁 Project Structure
 
