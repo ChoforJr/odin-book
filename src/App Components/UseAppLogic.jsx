@@ -100,7 +100,7 @@ export function useAppLogic() {
   };
 
   const getAccountInfo = async () => {
-    const authToken = localStorage.getItem("authorization");
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/user/self`, {
         method: "GET",
@@ -124,7 +124,8 @@ export function useAppLogic() {
     }
   };
 
-  const getFollowings = async (authToken) => {
+  const getFollowings = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/user/profile/followings`, {
         method: "GET",
@@ -147,10 +148,9 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshFollowings = () =>
-    getFollowings(localStorage.getItem("authorization"));
 
-  const getFollowers = async (authToken) => {
+  const getFollowers = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/user/profile/followers`, {
         method: "GET",
@@ -173,10 +173,9 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshFollowers = () =>
-    getFollowers(localStorage.getItem("authorization"));
 
-  const getExploreProfiles = async (authToken) => {
+  const getExploreProfiles = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/user/profile/explore`, {
         method: "GET",
@@ -199,8 +198,6 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshExploreProfiles = () =>
-    getExploreProfiles(localStorage.getItem("authorization"));
 
   const changeFollowingStatus = async (contactId) => {
     let authToken = localStorage.getItem("authorization");
@@ -216,8 +213,8 @@ export function useAppLogic() {
 
       if (response.ok) {
         getAccountInfo();
-        refreshFollowings();
-        refreshExploreProfiles();
+        getFollowings();
+        getExploreProfiles();
       } else {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -232,7 +229,8 @@ export function useAppLogic() {
     }
   };
 
-  const getHomePosts = async (authToken) => {
+  const getHomePosts = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/post/index`, {
         method: "GET",
@@ -255,10 +253,9 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshHomePosts = () =>
-    getHomePosts(localStorage.getItem("authorization"));
 
-  const getTrendingPosts = async (authToken) => {
+  const getTrendingPosts = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/post/trending`, {
         method: "GET",
@@ -281,10 +278,9 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshTrendingPosts = () =>
-    getTrendingPosts(localStorage.getItem("authorization"));
 
-  const getMyPosts = async (authToken) => {
+  const getMyPosts = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/post/mine`, {
         method: "GET",
@@ -307,10 +303,9 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshMyPosts = () =>
-    getMyPosts(localStorage.getItem("authorization"));
 
-  const getLikedPosts = async (authToken) => {
+  const getLikedPosts = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/post/liked`, {
         method: "GET",
@@ -333,10 +328,9 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshLikedPosts = () =>
-    getLikedPosts(localStorage.getItem("authorization"));
 
-  const getCommentedPosts = async (authToken) => {
+  const getCommentedPosts = async () => {
+    let authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/post/commented`, {
         method: "GET",
@@ -359,8 +353,6 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshCommentedPosts = () =>
-    getCommentedPosts(localStorage.getItem("authorization"));
 
   const createPost = async (content) => {
     let authToken = localStorage.getItem("authorization");
@@ -375,8 +367,8 @@ export function useAppLogic() {
       });
 
       if (response.ok) {
-        refreshMyPosts();
-        refreshHomePosts();
+        getMyPosts();
+        getHomePosts();
       } else {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -405,11 +397,11 @@ export function useAppLogic() {
       });
 
       if (response.ok) {
-        refreshLikedPosts();
-        refreshCommentedPosts();
-        refreshMyPosts();
-        refreshTrendingPosts();
-        refreshHomePosts();
+        getLikedPosts();
+        getCommentedPosts();
+        getMyPosts();
+        getTrendingPosts();
+        getHomePosts();
       } else {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -436,11 +428,11 @@ export function useAppLogic() {
       });
 
       if (response.ok) {
-        refreshLikedPosts();
-        refreshCommentedPosts();
-        refreshMyPosts();
-        refreshTrendingPosts();
-        refreshHomePosts();
+        getLikedPosts();
+        getCommentedPosts();
+        getMyPosts();
+        getTrendingPosts();
+        getHomePosts();
       } else {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -478,11 +470,11 @@ export function useAppLogic() {
     account,
     getAccountInfo,
     followings,
-    refreshFollowings,
+    getFollowings,
     followers,
-    refreshFollowers,
+    getFollowers,
     exploreProfiles,
-    refreshExploreProfiles,
+    getExploreProfiles,
     changeFollowingStatus,
     homePosts,
     trendingPosts,
