@@ -19,32 +19,7 @@ export function useAppLogic() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const authToken = localStorage.getItem("authorization");
-    if (!authToken) return;
-
-    const initializeApp = async () => {
-      try {
-        await Promise.all([
-          getAccountInfo(authToken),
-          getFollowings(authToken),
-          getFollowers(authToken),
-          getExploreProfiles(authToken),
-          getMyPosts(authToken),
-          getHomePosts(authToken),
-          getTrendingPosts(authToken),
-          getLikedPosts(authToken),
-          getCommentedPosts(authToken),
-        ]);
-
-        console.log("Initial app data loaded completely!");
-      } catch (error) {
-        console.error("Failed to initialize app data:", error);
-      } finally {
-        console.log("mounted either way");
-      }
-    };
-
-    initializeApp();
+    getInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -94,7 +69,38 @@ export function useAppLogic() {
     profilePhoto: getProfilePhoto(item),
   });
 
-  const getAccountInfo = async (authToken) => {
+  const getInitialData = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/initialData`, {
+        method: "GET",
+        headers: {
+          authorization: `${localStorage.getItem("authorization")}`,
+        },
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setAccount(normalizeProfile(result[0]));
+        setFollowings(result[1].map(normalizeProfile));
+        setFollowers(result[2].map(normalizeProfile));
+        setExploreProfiles(result[3].map(normalizeProfile));
+        setHomePosts(result[4].map(normalizePost));
+        setTrendingPosts(result[5].map(normalizePost));
+        setMyPosts(result[6].map(normalizePost));
+        setLikedPosts(result[7].map(normalizePost));
+        setCommentedPosts(result[8].map(normalizePost));
+        setAuth(true);
+      } else if (response.status === 401) {
+        setAuth(false);
+        localStorage.removeItem("authorization");
+        alert("Your session has expired. Please log in again.");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+
+  const getAccountInfo = async () => {
+    const authToken = localStorage.getItem("authorization");
     try {
       const response = await fetch(`${apiUrl}/user/self`, {
         method: "GET",
@@ -117,8 +123,6 @@ export function useAppLogic() {
       console.error("Network error:", error);
     }
   };
-  const refreshAccount = () =>
-    getAccountInfo(localStorage.getItem("authorization"));
 
   const getFollowings = async (authToken) => {
     try {
@@ -211,7 +215,7 @@ export function useAppLogic() {
       });
 
       if (response.ok) {
-        refreshAccount();
+        getAccountInfo();
         refreshFollowings();
         refreshExploreProfiles();
       } else {
@@ -472,7 +476,7 @@ export function useAppLogic() {
     logout,
     setAuth,
     account,
-    refreshAccount,
+    getAccountInfo,
     followings,
     refreshFollowings,
     followers,
@@ -485,6 +489,7 @@ export function useAppLogic() {
     myPosts,
     likedPosts,
     commentedPosts,
+    getInitialData,
     createPost,
     likePost,
     deletePost,

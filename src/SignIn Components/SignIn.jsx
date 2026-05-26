@@ -24,13 +24,7 @@ const SignIn = () => {
     confirm: false,
   });
 
-  const {
-    setAuth,
-    refreshAccount,
-    refreshFollowings,
-    refreshExploreProfiles,
-    refreshFollowers,
-  } = useContext(ItemContext);
+  const { setAuth, getInitialData } = useContext(ItemContext);
 
   const navigate = useNavigate();
 
@@ -70,12 +64,7 @@ const SignIn = () => {
         if (response.ok) {
           localStorage.setItem("authorization", `Bearer ${data.token}`);
           setAuth(true);
-          await Promise.all([
-            refreshAccount(),
-            refreshFollowings(),
-            refreshExploreProfiles(),
-            refreshFollowers(),
-          ]);
+          getInitialData();
           navigate("/setting", { replace: true });
         } else if (response.status === 400) {
           const errorMessages = data.errors.map((err) => err.msg).join("\n");
@@ -92,15 +81,7 @@ const SignIn = () => {
         setLoading(false);
       }
     },
-    [
-      login,
-      setAuth,
-      refreshAccount,
-      refreshFollowings,
-      refreshExploreProfiles,
-      refreshFollowers,
-      navigate,
-    ],
+    [login, setAuth, getInitialData, navigate],
   );
 
   const handleSignUpSubmit = useCallback(

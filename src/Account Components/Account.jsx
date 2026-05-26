@@ -5,7 +5,7 @@ import { ItemContext } from "../ItemContext";
 const apiUrl = import.meta.env.VITE_ODIN_BOOK_API_URL;
 
 const Account = () => {
-  const { auth, account, refreshAccount, logout } = useContext(ItemContext);
+  const { auth, account, getAccountInfo, logout } = useContext(ItemContext);
 
   const GUEST_ACCOUNTS = ["vegeta@gmail.com", "goku@gmail.com"];
   const isGuest = account ? GUEST_ACCOUNTS.includes(account.username) : false;
@@ -35,7 +35,7 @@ const Account = () => {
 
       if (response.ok) {
         alert(successMsg);
-        refreshAccount();
+        getAccountInfo();
         setNewDisplayName("");
         setNewBio("");
         setNewUsername("");
@@ -66,7 +66,7 @@ const Account = () => {
       });
 
       if (response.ok) {
-        refreshAccount();
+        getAccountInfo();
       } else {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
