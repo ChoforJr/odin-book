@@ -7,6 +7,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Odinbook — A place to connect",
   description: "Share what matters and stay connected with your community.",
+   icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 interface RootLayoutProps {
